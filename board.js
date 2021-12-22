@@ -34,4 +34,21 @@ class Board {
       });
     });
   }
+
+  rotate(p){
+    // 불변성을 위해 JSON으로 복사
+    let clone = JSON.parse(JSON.stringify(p));
+    // 알고리즘 처리
+    for (let y = 0; y < clone.shape.length; ++y) {
+      for (let x = 0; x < y; ++x) {
+        [clone.shape[x][y], clone.shape[y][x]] = [clone.shape[y][x], clone.shape[x][y]];
+      }
+    }
+    clone.shape.forEach((row) => row.reverse());
+
+    if(this.valid(clone)) {
+      return clone
+    }
+    return p;
+  }
 }

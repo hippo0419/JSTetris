@@ -19,7 +19,8 @@ moves = {
   [KEY.LEFT]:  p => ({ ...p, x: p.x - 1 }),
   [KEY.RIGHT]: p => ({ ...p, x: p.x + 1 }),
   [KEY.DOWN]:  p => ({ ...p, y: p.y + 1 }),
-  [KEY.SPACE]: p => ({ ...p, y: p.y + 1 })
+  [KEY.SPACE]: p => ({ ...p, y: p.y + 1 }),
+  [KEY.UP]: p => (board.rotate(p))
 };
 
 document.addEventListener("keydown", event => {
@@ -36,18 +37,15 @@ document.addEventListener("keydown", event => {
         board.piece.move(p);
         p = moves[KEY.DOWN](board.piece);
       }
-      
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       board.piece.draw();
     }
 
     if(board.valid(p)) {
       //이동이 가능한 상태라면 조각을 이동한다.
-      board.piece.move(p);
-
+      board.piece = Object.assign(board.piece, p);
       //그리기 전에 이전 좌표를 지운다.
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
       board.piece.draw();
     }
 
