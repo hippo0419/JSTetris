@@ -1,12 +1,18 @@
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
+const canvasNext = document.getElementById('next');
+const ctxNext = canvasNext.getContext('2d');
 
-ctx.canvas.width = COLS * BLOCK_SIZE;
-ctx.canvas.height = ROWS * BLOCK_SIZE;
+let board = new Board(ctx, ctxNext);
 
-ctx.scale(BLOCK_SIZE, BLOCK_SIZE);
+function initNext() {
+  // Calculate size of canvas from constants.
+  ctxNext.canvas.width = 4 * BLOCK_SIZE;
+  ctxNext.canvas.height = 4 * BLOCK_SIZE;
+  ctxNext.scale(BLOCK_SIZE, BLOCK_SIZE);
+}
+initNext();
 
-let board = new Board();
 function play() {
   board.reset();
   let piece = new Piece(ctx);
@@ -15,7 +21,7 @@ function play() {
   board.piece = piece; 
 }
 
-moves = {
+const moves = {
   [KEY.LEFT]:  p => ({ ...p, x: p.x - 1 }),
   [KEY.RIGHT]: p => ({ ...p, x: p.x + 1 }),
   [KEY.DOWN]:  p => ({ ...p, y: p.y + 1 }),

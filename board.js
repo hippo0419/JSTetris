@@ -1,16 +1,61 @@
 class Board {
+  //게임 보드와 다음 블록 컨텍스트 받아오기
+  ctx;
+  ctxNext;
+  piece;
+  next;
   grid;
-
-  //새 게임이 시작되면 보드를 초기화한다.
-  reset() {
-    this.grid = this.getEmptyBoard();
+  
+  constructor(ctx, ctxNext) {
+    this.ctx = ctx;
+    this.ctxNext = ctxNext;
+    this.init();
+    }
+  
+  init() {
+    //contants.js를 참고한 보드 크기 설정
+    this.ctx.canvas.width = COLS * BLOCK_SIZE;
+    this.ctx.canvas.height = ROWS * BLOCK_SIZE;
+    //ctx.scale()을 이용한 단위 크기 조정
+    this.ctx.scale(BLOCK_SIZE, BLOCK_SIZE);
   }
 
   //0으로 채워진 행렬을 얻는다.
-  getEmptyBoard() {
+  getEmptyGrid() {
     return Array.from(
       {length: ROWS}, () => Array(COLS).fill(0)
     );
+  }
+
+  //다음 피스 받아오기
+  getNewPiece() {
+    const {width, height} = this.ctxNext.canvas;
+    this.next = new Piece(this.ctxNext);
+    this.ctxNext.clearRect(0, 0, width, height);
+    this.next.draw();
+  }
+
+  draw() {
+    this.piece.draw();
+    this.drawBoard();
+  }
+
+  drawBoard() {
+    this.grid.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if(value > 0) {
+          this.ctx.fillStyle = COLORS[value];
+          this.ctx.fillRect(x, y, 1, 1);
+        }
+      })
+    })
+  }
+
+  reset() {
+    this.grid = this.getEmptyGrid();
+    this.piece = new Piece(this.ctx);
+    this.piece.setStartingPosition();
+    this.getNewPiece();
   }
 
   isEmty(value) {
