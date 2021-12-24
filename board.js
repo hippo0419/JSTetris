@@ -10,7 +10,7 @@ class Board {
     this.ctx = ctx;
     this.ctxNext = ctxNext;
     this.init();
-    }
+  }
   
   init() {
     //contants.js를 참고한 보드 크기 설정
@@ -20,14 +20,23 @@ class Board {
     this.ctx.scale(BLOCK_SIZE, BLOCK_SIZE);
   }
 
+  //보드 초기화와 관련된 함수들-----------------------
+  reset() {
+    this.grid = this.getEmptyGrid();
+    this.piece = new Piece(this.ctx);
+    this.piece.setStartingPosition();
+    this.getNewPiece();
+  }
+
   //0으로 채워진 행렬을 얻는다.
   getEmptyGrid() {
     return Array.from(
       {length: ROWS}, () => Array(COLS).fill(0)
     );
   }
+  //--------------------------------------------------
 
-  //다음 피스 받아오기
+  //다음 피스 ctxNext에 표시하기
   getNewPiece() {
     const {width, height} = this.ctxNext.canvas;
     this.next = new Piece(this.ctxNext);
@@ -35,6 +44,7 @@ class Board {
     this.next.draw();
   }
 
+  //보드 위 요소들을 그리는 함수들--------------------
   draw() {
     this.piece.draw();
     this.drawBoard();
@@ -50,12 +60,17 @@ class Board {
       })
     })
   }
+  //-------------------------------------------------
 
-  reset() {
-    this.grid = this.getEmptyGrid();
-    this.piece = new Piece(this.ctx);
-    this.piece.setStartingPosition();
-    this.getNewPiece();
+  //valid 함수와 이를 돕는 보조 함수들---------------
+  valid(p) {
+    return p.shape.every((row, dy) => {
+      return row.every((value, dx) => {
+        let x = p.x + dx;
+        let y = p.y + dy;
+        return (this.isEmty(value) || (this.insideWalls(x) && this.aboveFloor(y)));
+      });
+    });
   }
 
   isEmty(value) {
@@ -69,17 +84,9 @@ class Board {
   aboveFloor(y) {
     return y < 20;
   }
+  //-------------------------------------------------
 
-  valid(p) {
-    return p.shape.every((row, dy) => {
-      return row.every((value, dx) => {
-        let x = p.x + dx;
-        let y = p.y + dy;
-        return (this.isEmty(value) || (this.insideWalls(x) && this.aboveFloor(y)));
-      });
-    });
-  }
-
+  //piece 동작과 관련된 함수들-----------------------
   rotate(p){
     // 불변성을 위해 JSON으로 복사
     let clone = JSON.parse(JSON.stringify(p));
@@ -90,10 +97,29 @@ class Board {
       }
     }
     clone.shape.forEach((row) => row.reverse());
-
-    if(this.valid(clone)) {
-      return clone
-    }
-    return p;
+    return clone;
   }
+
+  //단위 시간마다 piece를 떨어뜨리기 위한 함수
+  drop() {
+    let p = moves[KEY.DOWN](this.piece);
+    if (this.valid(p)) {
+      this.piece.move(p);
+    } else {
+      return false;
+    }
+    return true;
+  }
+  
+  //piece를 grid에 포함시킴으로서 엄추는 함수
+  freeze() {
+    this.piece.shape.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if(value > 0) {
+          this.grid[y + this.piece.y][x + this.piece.x] = value;
+        }
+      });
+    });
+  }
+  //-------------------------------------------------
 }
