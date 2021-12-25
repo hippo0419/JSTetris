@@ -68,7 +68,7 @@ class Board {
       return row.every((value, dx) => {
         let x = p.x + dx;
         let y = p.y + dy;
-        return (this.isEmty(value) || (this.insideWalls(x) && this.aboveFloor(y)));
+        return (this.isEmty(value) || (this.insideWalls(x) && this.aboveFloor(x, y)));
       });
     });
   }
@@ -81,8 +81,8 @@ class Board {
     return x >= 0 && x < 10;
   }
 
-  aboveFloor(y) {
-    return y < 20;
+  aboveFloor(x, y) {
+    return y < 20 && (this.grid[y][x] === 0);
   }
   //-------------------------------------------------
 
@@ -100,15 +100,32 @@ class Board {
     return clone;
   }
 
-  //단위 시간마다 piece를 떨어뜨리기 위한 함수
+  //단위 시간마다 piece를 떨어뜨리기 위한 함수. drop 후 piece가 조작 가능하면 true를 리턴
   drop() {
     let p = moves[KEY.DOWN](this.piece);
     if (this.valid(p)) {
       this.piece.move(p);
     } else {
-      return false;
+      this.freeze();
+      this.clearLines();
+      if(this.piece.y === 0) {
+        return false;
+      }
+      this.piece = this.next;
+      this.piece.ctx = this.ctx;
+      this.piece.setStartingPosition();
+      this.getNewPiece();
     }
     return true;
+  }
+  
+  clearLines() {
+    this.grid.forEach((row, y) => {
+      if(row.every(value => value > 0)) {
+        this.grid.splice(y, 1);
+        this.grid.unshift(Array(COLS).fill(0));
+      }
+    });
   }
   
   //piece를 grid에 포함시킴으로서 엄추는 함수

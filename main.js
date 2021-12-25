@@ -54,9 +54,12 @@ function animate(now = 0) {
   }
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
   board.draw();
   requestId = requestAnimationFrame(animate);
+}
+
+function isGameOver() {
+  return false;
 }
 
 let board = new Board(ctx, ctxNext);
@@ -89,4 +92,4 @@ document.addEventListener("keydown", event => {
     }
 
   }
-})
+});
