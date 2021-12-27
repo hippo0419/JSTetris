@@ -115,20 +115,40 @@ class Board {
       this.piece.ctx = this.ctx;
       this.piece.setStartingPosition();
       this.getNewPiece();
+      account.score += (keyCodeBuf === KEY.SPACE ? POINTS.HARD_DROP : POINTS.SOFT_DROP);;
     }
     return true;
   }
   
   clearLines() {
+    let clearedLines = 0;
+
     this.grid.forEach((row, y) => {
       if(row.every(value => value > 0)) {
         this.grid.splice(y, 1);
         this.grid.unshift(Array(COLS).fill(0));
+        clearedLines++;
       }
     });
+
+    account.score += (account.level + 1) * this.getLineClearPoints(clearedLines);
+    account.lines += clearedLines;
+    if(account.lines >= LINES_PER_LEVEL) {
+      account.level++;
+      account.lines -= LINES_PER_LEVEL;
+      time.level = LEVEL[account.level];
+    }
   }
   
-  //piece를 grid에 포함시킴으로서 엄추는 함수
+  getLineClearPoints(lines) {
+    return lines === 1 ? POINTS.SINGLE :
+           lines === 2 ? POINTS.DOUBLE :
+           lines === 3 ? POINTS.TRIPLE :
+           lines === 4 ? POINTS.TETRIS :
+           0;
+  }
+
+  //piece를 grid에 포함시킴으로서 멈추는 함수
   freeze() {
     this.piece.shape.forEach((row, y) => {
       row.forEach((value, x) => {

@@ -56,3 +56,18 @@ const POINTS = {
   HARD_DROP: 2
 };
 Object.freeze(POINTS);
+
+const DROPCASE = {
+  CONTINUE: 0,
+  GAMEOVER: 1,
+  FREEZE:   2
+};
+
+const LINES_PER_LEVEL = 10;
+const LEVEL = {
+  0: 800,
+  1: 720,
+  2: 630,
+  3: 550
+};
+Object.freeze(LEVEL);

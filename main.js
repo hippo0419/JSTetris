@@ -3,6 +3,8 @@ const ctx = canvas.getContext("2d");
 const canvasNext = document.getElementById('next');
 const ctxNext = canvasNext.getContext('2d');
 
+let keyCodeBuf
+
 let accountValues = {
   score: 0,
   level: 0,
@@ -15,7 +17,7 @@ const moves = {
   [KEY.DOWN]:  p => ({ ...p, y: p.y + 1 }),
   [KEY.SPACE]: p => ({ ...p, y: p.y + 1 }),
   [KEY.UP]: p => board.rotate(p)
-};
+}
 
 function updateAccount(key, value) {
   let element = document.getElementById(key);
@@ -23,6 +25,14 @@ function updateAccount(key, value) {
     element.textContent = value;
   }
 }
+
+let account = new Proxy(accountValues, {
+  set: (target, key, value) => {
+    target[key] = value;
+    updateAccount(key, value);
+    return true;
+  }
+});
 
 function initNext() {
   // Calculate size of canvas from constants.
@@ -32,14 +42,16 @@ function initNext() {
 }
 
 function resetGame() {
+  account.score = 0;
+  account.lines = 0;
+  account.level = 0;
   board.reset();
-  time = { start: 0, elapsed: 0, level: 1000};
+  time = { start: 0, elapsed: 0, level: LEVEL[account.level]};
 }
 
 function play() {
   resetGame();
   board.piece.draw();
-
   animate();
 }
 
@@ -48,7 +60,7 @@ function animate(now = 0) {
   if(time.elapsed > time.level) {
     time.start = now;
     if(!board.drop()) {
-      console.log("Game Over!");
+      gameOver();
       return;
     }
   }
@@ -58,8 +70,13 @@ function animate(now = 0) {
   requestId = requestAnimationFrame(animate);
 }
 
-function isGameOver() {
-  return false;
+function gameOver() {
+  cancelAnimationFrame(requestId);
+  ctx.fillStyle = "black";
+  ctx.fillRect(1, 3, 8, 1.2);
+  ctx.font = "1px Arial";
+  ctx.fillStyle = "red";
+  ctx.fillText("GAME OVER", 1.8, 4);
 }
 
 let board = new Board(ctx, ctxNext);
@@ -90,6 +107,6 @@ document.addEventListener("keydown", event => {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       board.piece.draw();
     }
-
+    keyCodeBuf = event.keyCode;
   }
 });
